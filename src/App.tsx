@@ -66,7 +66,6 @@ function Icon({
 }
 
 const initialReport = compareContracts(BASELINE_SAMPLE, CANDIDATE_SAMPLE);
-const fmt = (value: number) => String(value).padStart(2, '0');
 
 export default function App() {
   const [baseline, setBaseline] = useState(BASELINE_SAMPLE);
@@ -189,7 +188,7 @@ export default function App() {
           <span className="mark">
             <Icon name="brackets" size={25} />
           </span>
-          contractscope<span className="version">v0.1</span>
+          Contractscope<span className="version">v0.1</span>
         </a>
         <nav aria-label="Main navigation">
           <span className="nav-current">Workbench</span>
@@ -209,47 +208,35 @@ export default function App() {
       <main>
         <section className="intro">
           <div>
-            <p className="eyebrow">
-              <span className="tiny-line" /> OPENAPI CHANGE REVIEW
-            </p>
-            <h1>
-              Know what changes.
-              <br />
-              <span>Before they ship.</span>
-            </h1>
+            <h1>Compare OpenAPI contracts</h1>
+            <p>Choose a baseline and a candidate, then review the changes.</p>
           </div>
-          <div className="intro-right">
-            <p>
-              Compare API contracts. Find changes that affect your callers. See exactly what needs a
-              closer look.
-            </p>
-            <div className="privacy">
-              <span className="status-light" /> Files stay in this browser{' '}
-              <span className="dot">·</span> JSON / YAML
-            </div>
-          </div>
+          <p className="input-limits">
+            JSON or YAML · 512 KiB per file.
+            <br /> Processed in this browser
+          </p>
         </section>
 
         {guide && (
           <section className="guide" aria-label="Rule guide">
-            <div className="section-label">THE COMPATIBILITY DIRECTION</div>
+            <div className="section-label">Compatibility rules</div>
             <div className="guide-columns">
               <div>
-                <h3>Requests may accept more.</h3>
+                <h3>Request inputs</h3>
                 <p>
                   Adding a required input or removing an accepted enum value breaks callers. Making
                   an input optional widens the accepted set.
                 </p>
               </div>
               <div>
-                <h3>Responses may promise more.</h3>
+                <h3>Response guarantees</h3>
                 <p>
                   Removing a guaranteed field or adding a possible enum value can break callers.
                   Adding a field to a closed response object also violates its old schema.
                 </p>
               </div>
               <div>
-                <h3>Unknown means unreviewed.</h3>
+                <h3>Unsupported rules</h3>
                 <p>
                   Open objects, composition, external or cyclic refs, validation bounds, security,
                   and wire formats produce coverage warnings. This is a structural review, not a
@@ -267,18 +254,12 @@ export default function App() {
           {[baseline, candidate].map((text, side) => (
             <article className={`input-card ${side === 1 ? 'candidate' : ''}`} key={side}>
               <div className="card-top">
-                <span className="section-label">
-                  <span className="number">0{side + 1}</span>
-                  {side === 0 ? 'BASELINE' : 'CANDIDATE'}
-                </span>
+                <span className="section-label">{side === 0 ? 'Baseline' : 'Candidate'}</span>
                 <span className="card-caption">
-                  {side === 0 ? 'What clients rely on' : 'What you want to ship'}
+                  {side === 0 ? 'Current contract' : 'Proposed contract'}
                 </span>
               </div>
               <div className="file-row">
-                <span className="file-icon">
-                  <Icon name="code" size={23} />
-                </span>
                 <div className="file-info">
                   <strong title={names[side]}>
                     {loading[side] ? 'Reading file…' : names[side]}
@@ -311,21 +292,13 @@ export default function App() {
                 }}
               />
               <div className="card-bottom">
-                <span>
-                  {example ? (
-                    <>
-                      <span className="example-dot" /> EXAMPLE CONTRACT
-                    </>
-                  ) : (
-                    'LOCAL INPUT · 512 KiB MAX'
-                  )}
-                </span>
+                <span>{example ? 'Example file' : 'Local file or pasted source'}</span>
                 <button
                   className="text-button"
                   onClick={() => setEditing(editing === side ? null : side)}
                   aria-expanded={editing === side}
                 >
-                  {editing === side ? 'Close source' : 'Edit or paste source'} <span>↗</span>
+                  {editing === side ? 'Close source' : 'Edit or paste source'}
                 </button>
               </div>
             </article>
@@ -380,18 +353,12 @@ export default function App() {
           <section className="results" aria-label="Comparison results">
             <div className="results-heading">
               <div>
-                <p className="section-label">
-                  COMPARISON REPORT {example && <span className="example-label">EXAMPLE</span>}
-                </p>
                 <h2>
-                  {report.summary.breaking
-                    ? 'Some promises have changed.'
-                    : report.warnings.length
-                      ? 'This contract needs a closer look.'
-                      : report.changes.length
-                        ? 'The supported rules found no breaks.'
-                        : 'No structural changes found.'}
+                  Comparison results {example && <span className="example-label">Example</span>}
                 </h2>
+                <p className="result-direction">
+                  {report.baseline.version} → {report.candidate.version}
+                </p>
               </div>
               <button className="button export" onClick={download}>
                 <Icon name="download" size={16} /> Export JSON
@@ -399,21 +366,21 @@ export default function App() {
             </div>
             <div className="summary-strip">
               <div className="metric breaking">
-                <span className="metric-number">{fmt(report.summary.breaking)}</span>
+                <span className="metric-number">{report.summary.breaking}</span>
                 <div>
                   <strong>Breaking</strong>
                   <span>Existing callers may be affected</span>
                 </div>
               </div>
               <div className="metric compatible">
-                <span className="metric-number">{fmt(report.summary.compatible)}</span>
+                <span className="metric-number">{report.summary.compatible}</span>
                 <div>
                   <strong>Compatible changes</strong>
                   <span>Within the supported rules</span>
                 </div>
               </div>
               <div className={`metric coverage ${report.warnings.length ? 'has-warnings' : ''}`}>
-                <span className="metric-number">{fmt(report.warnings.length)}</span>
+                <span className="metric-number">{report.warnings.length}</span>
                 <div>
                   <strong>Coverage warnings</strong>
                   <span>
@@ -444,12 +411,12 @@ export default function App() {
               </div>
               <span className={`coverage-note ${report.warnings.length ? 'warning-text' : ''}`}>
                 <Icon name={report.warnings.length ? 'code' : 'check'} size={14} />{' '}
-                {report.warnings.length ? 'Incomplete coverage' : 'Supported scope reviewed'}
+                {report.warnings.length ? 'Incomplete coverage' : 'No coverage warnings'}
               </span>
             </div>
             <div className="review-grid">
               <aside className="operation-nav" aria-label="Filter by operation">
-                <div className="section-label">OPERATIONS</div>
+                <div className="section-label">Operations</div>
                 <button
                   onClick={() => setOperation('all')}
                   className={operation === 'all' ? 'active' : ''}
@@ -473,7 +440,7 @@ export default function App() {
                   </button>
                 ))}
                 <div className="direction-note">
-                  <span>COMPARISON DIRECTION</span>
+                  <span>Comparison direction</span>
                   <p>
                     {report.baseline.version}
                     <br />
@@ -564,7 +531,7 @@ export default function App() {
         {!report && !error && (
           <section className="waiting">
             <Icon name="brackets" size={32} />
-            <h2>Ready when your contracts are.</h2>
+            <h2>Inputs changed</h2>
             <p>
               Compare the baseline with the candidate to see the directional impact of each
               supported change.
@@ -576,13 +543,13 @@ export default function App() {
         <span>
           <Icon name="brackets" size={17} /> contractscope
         </span>
-        <p>Small rules. Explicit limits. Reviewable decisions.</p>
+        <p>OpenAPI 3.0 / 3.1 · Structural comparison</p>
         <a
           href="https://github.com/miiduoa/contractscope/blob/main/docs/design.zh-TW.md"
           target="_blank"
           rel="noreferrer"
         >
-          設計筆記 <Icon name="external" size={12} />
+          Design notes <Icon name="external" size={12} />
         </a>
       </footer>
     </>
@@ -597,31 +564,31 @@ function ChangeDetail({ change }: { change: Change }) {
   return (
     <>
       <div className="detail-top">
-        <span className="section-label">CHANGE DETAIL</span>
+        <span className="section-label">Selected change</span>
         <span className={`severity-label ${change.severity}`}>
-          {change.severity === 'breaking' ? 'BREAKING' : 'COMPATIBLE'}
+          {change.severity === 'breaking' ? 'Breaking' : 'Compatible'}
         </span>
       </div>
       <h3>{change.title}</h3>
       <p className="detail-rationale">{change.rationale}</p>
       <div className="value-comparison">
         <div>
-          <span>BASELINE</span>
+          <span>Baseline</span>
           <code>{change.before ?? '—'}</code>
         </div>
         <span className="value-arrow">↓</span>
         <div>
-          <span>CANDIDATE</span>
+          <span>Candidate</span>
           <code>{change.after ?? '—'}</code>
         </div>
       </div>
       <div className="detail-location">
-        <span className="section-label">WHERE TO LOOK</span>
+        <span className="section-label">Location</span>
         <code>{change.operation}</code>
         <code className="pointer">{change.location}</code>
       </div>
       <div className="rule-reference">
-        <span className="section-label">RULE</span>
+        <span className="section-label">Rule</span>
         <code>{change.rule}</code>
       </div>
       <div className="detail-advice">

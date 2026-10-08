@@ -23,7 +23,7 @@ npm run dev
 
 Choose or paste a baseline and candidate, then compare. The supplied workspace reservations API is a fictional example, clearly labeled in the interface. Changing either input clears the previous report. Filter by severity or operation, inspect a finding, and export the complete JSON report. Swapping the inputs requires a new comparison: compatibility is directional.
 
-Contract contents are processed in the browser. There is no upload endpoint, account, tracking, or persistence. The interface loads typefaces from Google Fonts; file contents are never included in font requests. System fonts remain usable if fonts are unavailable.
+Contract contents are processed in the browser. There is no upload endpoint, account, tracking, or persistence. The interface uses system fonts and makes no external font requests.
 
 ## Run it in CI
 
